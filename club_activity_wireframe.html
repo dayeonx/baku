@@ -1,0 +1,591 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.screen-nav {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.nav-btn {
+  padding: 6px 14px; font-size: 12px; border-radius: 20px;
+  border: 0.5px solid var(--color-border-secondary);
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  cursor: pointer; transition: all .18s;
+}
+.nav-btn.active {
+  background: var(--color-text-primary);
+  color: var(--color-background-primary);
+  border-color: var(--color-text-primary);
+}
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* 공통 모형 스타일 */
+.mockup-frame {
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  background: var(--color-background-primary);
+}
+.topbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  background: var(--color-background-primary);
+}
+.topbar-logo {
+  font-size: 14px; font-weight: 500; color: var(--color-text-primary);
+}
+.topbar-logo span {
+  display: inline-block; width: 20px; height: 20px; border-radius: 6px;
+  background: var(--color-text-primary); color: var(--color-background-primary);
+  font-size: 11px; font-weight: 500; text-align: center; line-height: 20px;
+  margin-right: 6px;
+}
+.topbar-nav {
+  display: flex; gap: 2px; margin-left: 16px; flex: 1;
+}
+.tnav {
+  padding: 4px 12px; font-size: 12px; border-radius: 6px;
+  color: var(--color-text-secondary); cursor: pointer;
+}
+.tnav.on { background: var(--color-background-secondary); color: var(--color-text-primary); font-weight: 500; }
+.topbar-right { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+.topbar-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--color-background-tertiary);
+  border: 0.5px solid var(--color-border-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--color-text-secondary);
+}
+.badge {
+  padding: 2px 8px; border-radius: 10px; font-size: 11px;
+}
+.badge-blue { background: var(--color-background-info); color: var(--color-text-info); }
+.badge-green { background: var(--color-background-success); color: var(--color-text-success); }
+.badge-warn { background: var(--color-background-warning); color: var(--color-text-warning); }
+.badge-gray {
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+}
+.section-label {
+  font-size: 11px; font-weight: 500; color: var(--color-text-tertiary);
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px;
+}
+.card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 14px 16px;
+}
+.card + .card { margin-top: 8px; }
+.row { display: flex; align-items: center; gap: 10px; }
+.row + .row { margin-top: 6px; }
+.skeleton {
+  background: var(--color-background-tertiary);
+  border-radius: 4px; display: inline-block;
+}
+.skel-text { height: 10px; }
+.skel-img { height: 60px; border-radius: var(--border-radius-md); }
+.divider {
+  border: none; border-top: 0.5px solid var(--color-border-tertiary);
+  margin: 10px 0;
+}
+.chip {
+  padding: 3px 10px; border-radius: 12px; font-size: 11px;
+  border: 0.5px solid var(--color-border-tertiary);
+  color: var(--color-text-secondary);
+  background: var(--color-background-secondary);
+  display: inline-block;
+}
+.chip.sel {
+  border-color: var(--color-border-primary);
+  color: var(--color-text-primary);
+  background: var(--color-background-primary);
+}
+.field-label { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 4px; }
+.field-val { font-size: 13px; color: var(--color-text-primary); }
+.annot {
+  font-size: 11px; color: var(--color-text-info);
+  background: var(--color-background-info);
+  border: 0.5px solid var(--color-border-info);
+  border-radius: var(--border-radius-md);
+  padding: 5px 10px; margin-top: 6px;
+  display: flex; align-items: flex-start; gap: 6px;
+}
+.annot i { margin-top: 1px; flex-shrink: 0; }
+/* screen header bar */
+.screen-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+.screen-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--color-text-primary); color: var(--color-background-primary);
+  font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.screen-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.screen-desc { font-size: 12px; color: var(--color-text-secondary); margin-left: auto; }
+</style>
+
+<h2 class="sr-only">동아리 활동 정리 웹사이트 화면 설계서</h2>
+
+<div class="screen-nav">
+  <button class="nav-btn active" onclick="show('s1',this)">① 메인 대시보드</button>
+  <button class="nav-btn" onclick="show('s2',this)">② 활동 목록</button>
+  <button class="nav-btn" onclick="show('s3',this)">③ 활동 상세</button>
+  <button class="nav-btn" onclick="show('s4',this)">④ 활동 등록</button>
+  <button class="nav-btn" onclick="show('s5',this)">⑤ 멤버 관리</button>
+</div>
+
+<!-- ===== S1 메인 대시보드 ===== -->
+<div id="s1" class="screen active">
+  <div class="screen-header">
+    <div class="screen-num">1</div>
+    <div class="screen-title">메인 대시보드</div>
+    <div class="screen-desc">로그인 후 첫 화면 · 전체 현황 요약</div>
+  </div>
+  <div class="mockup-frame">
+    <div class="topbar">
+      <div class="topbar-logo"><span>C</span>클럽로그</div>
+      <div class="topbar-nav">
+        <div class="tnav on">대시보드</div>
+        <div class="tnav">활동 기록</div>
+        <div class="tnav">멤버</div>
+        <div class="tnav">앨범</div>
+      </div>
+      <div class="topbar-right">
+        <i class="ti ti-bell" aria-hidden="true" style="font-size:16px;color:var(--color-text-secondary)"></i>
+        <div class="topbar-avatar"><i class="ti ti-user" style="font-size:12px"></i></div>
+      </div>
+    </div>
+    <div style="padding: 16px;">
+      <!-- 환영 + 요약 수치 -->
+      <div style="margin-bottom: 14px;">
+        <div style="font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 10px;">안녕하세요, 김민준 님 👋</div>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px;">
+          <div class="card" style="padding: 10px 12px; text-align:center;">
+            <div style="font-size:20px; font-weight:500; color:var(--color-text-primary)">24</div>
+            <div style="font-size:11px; color:var(--color-text-tertiary); margin-top:2px">총 활동 수</div>
+          </div>
+          <div class="card" style="padding: 10px 12px; text-align:center;">
+            <div style="font-size:20px; font-weight:500; color:var(--color-text-primary)">18</div>
+            <div style="font-size:11px; color:var(--color-text-tertiary); margin-top:2px">참여 멤버</div>
+          </div>
+          <div class="card" style="padding: 10px 12px; text-align:center;">
+            <div style="font-size:20px; font-weight:500; color:var(--color-text-primary)">3</div>
+            <div style="font-size:11px; color:var(--color-text-tertiary); margin-top:2px">이번 달 활동</div>
+          </div>
+          <div class="card" style="padding: 10px 12px; text-align:center;">
+            <div style="font-size:20px; font-weight:500; color:var(--color-text-primary)">147</div>
+            <div style="font-size:11px; color:var(--color-text-tertiary); margin-top:2px">사진</div>
+          </div>
+        </div>
+      </div>
+      <!-- 최근 활동 + 예정 활동 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div>
+          <div class="section-label">최근 활동</div>
+          <div class="card">
+            <div class="row">
+              <div style="width:36px;height:36px;border-radius:8px;background:var(--color-background-tertiary);flex-shrink:0;display:flex;align-items:center;justify-content:center">
+                <i class="ti ti-camera" style="font-size:16px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">5월 정기 사진 촬영</div>
+                <div style="font-size:11px;color:var(--color-text-tertiary)">2025.05.18 · 12명 참여</div>
+              </div>
+              <span class="badge badge-green">완료</span>
+            </div>
+            <hr class="divider">
+            <div class="row">
+              <div style="width:36px;height:36px;border-radius:8px;background:var(--color-background-tertiary);flex-shrink:0;display:flex;align-items:center;justify-content:center">
+                <i class="ti ti-presentation" style="font-size:16px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">전시 기획 회의</div>
+                <div style="font-size:11px;color:var(--color-text-tertiary)">2025.05.10 · 8명 참여</div>
+              </div>
+              <span class="badge badge-green">완료</span>
+            </div>
+            <hr class="divider">
+            <div class="row">
+              <div style="width:36px;height:36px;border-radius:8px;background:var(--color-background-tertiary);flex-shrink:0;display:flex;align-items:center;justify-content:center">
+                <i class="ti ti-users" style="font-size:16px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">신입 환영회</div>
+                <div style="font-size:11px;color:var(--color-text-tertiary)">2025.04.26 · 18명 참여</div>
+              </div>
+              <span class="badge badge-green">완료</span>
+            </div>
+          </div>
+          <div class="annot"><i class="ti ti-info-circle" aria-hidden="true"></i>클릭 시 활동 상세 페이지로 이동</div>
+        </div>
+        <div>
+          <div class="section-label">예정된 활동</div>
+          <div class="card">
+            <div class="row">
+              <div style="min-width:36px;height:36px;border-radius:8px;background:var(--color-background-info);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+                <div style="font-size:9px;color:var(--color-text-info);line-height:1">06월</div>
+                <div style="font-size:14px;font-weight:500;color:var(--color-text-info);line-height:1.2">07</div>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:500;color:var(--color-text-primary)">야외 출사</div>
+                <div style="font-size:11px;color:var(--color-text-tertiary)">경복궁 · 참여신청 5명</div>
+              </div>
+              <span class="badge badge-blue">예정</span>
+            </div>
+            <hr class="divider">
+            <div class="row">
+              <div style="min-width:36px;height:36px;border-radius:8px;background:var(--color-background-warning);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+                <div style="font-size:9px;color:var(--color-text-warning);line-height:1">06월</div>
+                <div style="font-size:14px;font-weight:500;color:var(--color-text-warning);line-height:1.2">21</div>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:500;color:var(--color-text-primary)">상반기 결산 총회</div>
+                <div style="font-size:11px;color:var(--color-text-tertiary)">동아리방 · 전체 참여</div>
+              </div>
+              <span class="badge badge-warn">D-21</span>
+            </div>
+          </div>
+          <div class="annot"><i class="ti ti-info-circle" aria-hidden="true"></i>참여 신청 버튼 제공</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== S2 활동 목록 ===== -->
+<div id="s2" class="screen">
+  <div class="screen-header">
+    <div class="screen-num">2</div>
+    <div class="screen-title">활동 목록</div>
+    <div class="screen-desc">전체 활동 조회 · 검색 · 필터</div>
+  </div>
+  <div class="mockup-frame">
+    <div class="topbar">
+      <div class="topbar-logo"><span>C</span>클럽로그</div>
+      <div class="topbar-nav">
+        <div class="tnav">대시보드</div>
+        <div class="tnav on">활동 기록</div>
+        <div class="tnav">멤버</div>
+        <div class="tnav">앨범</div>
+      </div>
+      <div class="topbar-right">
+        <i class="ti ti-bell" aria-hidden="true" style="font-size:16px;color:var(--color-text-secondary)"></i>
+        <div class="topbar-avatar"><i class="ti ti-user" style="font-size:12px"></i></div>
+      </div>
+    </div>
+    <div style="padding: 16px;">
+      <!-- 검색 + 필터 바 -->
+      <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items:center;">
+        <div style="flex:1; display:flex; align-items:center; gap:6px; background:var(--color-background-secondary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:7px 10px;">
+          <i class="ti ti-search" style="font-size:14px;color:var(--color-text-tertiary)" aria-hidden="true"></i>
+          <span style="font-size:12px;color:var(--color-text-tertiary)">활동명, 날짜, 장소 검색</span>
+        </div>
+        <button style="display:flex;align-items:center;gap:5px;padding:7px 12px;font-size:12px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);cursor:pointer">
+          <i class="ti ti-plus" aria-hidden="true"></i> 활동 등록
+        </button>
+      </div>
+      <!-- 필터 칩 -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+        <span class="chip sel">전체</span>
+        <span class="chip">정기모임</span>
+        <span class="chip">촬영</span>
+        <span class="chip">전시/행사</span>
+        <span class="chip">회의</span>
+        <span class="chip">2025</span>
+        <span class="chip">완료</span>
+        <span class="chip">예정</span>
+      </div>
+      <!-- 목록 -->
+      <div class="section-label">24건</div>
+      <div class="card">
+        <div class="row" style="padding-bottom:10px">
+          <div style="width:48px;height:48px;background:var(--color-background-tertiary);border-radius:8px;flex-shrink:0"></div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+              <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">5월 정기 사진 촬영</div>
+              <span class="badge badge-blue">촬영</span>
+            </div>
+            <div style="font-size:11px;color:var(--color-text-tertiary)">2025.05.18 · 한강공원 · 참여자 12명</div>
+          </div>
+          <span class="badge badge-green">완료</span>
+        </div>
+        <hr class="divider" style="margin:0 0 10px">
+        <div class="row" style="padding-bottom:10px">
+          <div style="width:48px;height:48px;background:var(--color-background-tertiary);border-radius:8px;flex-shrink:0"></div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+              <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">전시 기획 회의</div>
+              <span class="badge badge-gray">회의</span>
+            </div>
+            <div style="font-size:11px;color:var(--color-text-tertiary)">2025.05.10 · 동아리방 · 참여자 8명</div>
+          </div>
+          <span class="badge badge-green">완료</span>
+        </div>
+        <hr class="divider" style="margin:0 0 10px">
+        <div class="row">
+          <div style="width:48px;height:48px;background:var(--color-background-tertiary);border-radius:8px;flex-shrink:0"></div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+              <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">신입 환영회</div>
+              <span class="badge badge-warn">행사</span>
+            </div>
+            <div style="font-size:11px;color:var(--color-text-tertiary)">2025.04.26 · 학생회관 · 참여자 18명</div>
+          </div>
+          <span class="badge badge-green">완료</span>
+        </div>
+      </div>
+      <div class="annot" style="margin-top:8px"><i class="ti ti-info-circle" aria-hidden="true"></i>행 클릭 → 활동 상세 / 페이지네이션 하단 제공</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== S3 활동 상세 ===== -->
+<div id="s3" class="screen">
+  <div class="screen-header">
+    <div class="screen-num">3</div>
+    <div class="screen-title">활동 상세</div>
+    <div class="screen-desc">활동 정보 · 참석자 · 사진 · 후기</div>
+  </div>
+  <div class="mockup-frame">
+    <div class="topbar">
+      <div class="topbar-logo"><span>C</span>클럽로그</div>
+      <div class="topbar-nav">
+        <div class="tnav">대시보드</div>
+        <div class="tnav on">활동 기록</div>
+        <div class="tnav">멤버</div>
+        <div class="tnav">앨범</div>
+      </div>
+      <div class="topbar-right">
+        <i class="ti ti-bell" aria-hidden="true" style="font-size:16px;color:var(--color-text-secondary)"></i>
+        <div class="topbar-avatar"><i class="ti ti-user" style="font-size:12px"></i></div>
+      </div>
+    </div>
+    <div style="padding: 16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <i class="ti ti-arrow-left" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+        <span style="font-size:12px;color:var(--color-text-secondary)">활동 목록으로</span>
+      </div>
+      <!-- 헤더 이미지 영역 -->
+      <div style="height:80px;background:var(--color-background-tertiary);border-radius:var(--border-radius-lg);margin-bottom:14px;display:flex;align-items:center;justify-content:center;">
+        <i class="ti ti-photo" style="font-size:20px;color:var(--color-text-tertiary)" aria-hidden="true"></i>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:14px">
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">5월 정기 사진 촬영</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="badge badge-blue">촬영</span>
+            <span class="badge badge-green">완료</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button style="padding:5px 10px;font-size:11px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;cursor:pointer;color:var(--color-text-secondary)"><i class="ti ti-edit" aria-hidden="true"></i> 수정</button>
+        </div>
+      </div>
+      <!-- 기본 정보 + 참석자 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div class="card">
+          <div class="section-label" style="margin-bottom:10px">기본 정보</div>
+          <div style="display:grid;gap:8px">
+            <div><div class="field-label">날짜</div><div class="field-val">2025.05.18 (일) 10:00</div></div>
+            <div><div class="field-label">장소</div><div class="field-val">서울 한강공원 여의도</div></div>
+            <div><div class="field-label">참여 인원</div><div class="field-val">12명 / 20명</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-label" style="margin-bottom:10px">참석자</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px">
+            <div style="width:26px;height:26px;border-radius:50%;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--color-text-info);font-weight:500">김</div>
+            <div style="width:26px;height:26px;border-radius:50%;background:var(--color-background-success);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--color-text-success);font-weight:500">이</div>
+            <div style="width:26px;height:26px;border-radius:50%;background:var(--color-background-warning);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--color-text-warning);font-weight:500">박</div>
+            <div style="width:26px;height:26px;border-radius:50%;background:var(--color-background-tertiary);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--color-text-secondary);font-weight:500">최</div>
+            <div style="width:26px;height:26px;border-radius:50%;background:var(--color-background-tertiary);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--color-text-secondary);font-weight:500">정</div>
+            <div style="width:26px;height:26px;border-radius:50%;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--color-text-tertiary)">+7</div>
+          </div>
+          <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:8px">이름 클릭 → 멤버 프로필</div>
+        </div>
+      </div>
+      <!-- 사진 갤러리 미리보기 -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="section-label" style="margin-bottom:0">첨부 사진 (23장)</div>
+          <span style="font-size:11px;color:var(--color-text-info);cursor:pointer">전체보기</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">
+          <div style="aspect-ratio:1;background:var(--color-background-tertiary);border-radius:6px"></div>
+          <div style="aspect-ratio:1;background:var(--color-background-tertiary);border-radius:6px"></div>
+          <div style="aspect-ratio:1;background:var(--color-background-tertiary);border-radius:6px"></div>
+          <div style="aspect-ratio:1;background:var(--color-background-secondary);border-radius:6px;display:flex;align-items:center;justify-content:center;border:0.5px solid var(--color-border-tertiary)"><span style="font-size:11px;color:var(--color-text-tertiary)">+20</span></div>
+        </div>
+      </div>
+      <div class="annot" style="margin-top:8px"><i class="ti ti-info-circle" aria-hidden="true"></i>사진 업로드, 후기 작성, 출석 체크 기능 포함</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== S4 활동 등록 ===== -->
+<div id="s4" class="screen">
+  <div class="screen-header">
+    <div class="screen-num">4</div>
+    <div class="screen-title">활동 등록</div>
+    <div class="screen-desc">신규 활동 생성 폼</div>
+  </div>
+  <div class="mockup-frame">
+    <div class="topbar">
+      <div class="topbar-logo"><span>C</span>클럽로그</div>
+      <div class="topbar-nav">
+        <div class="tnav">대시보드</div>
+        <div class="tnav on">활동 기록</div>
+        <div class="tnav">멤버</div>
+        <div class="tnav">앨범</div>
+      </div>
+    </div>
+    <div style="padding: 16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <i class="ti ti-arrow-left" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+        <span style="font-size:14px;font-weight:500;color:var(--color-text-primary)">새 활동 등록</span>
+      </div>
+      <div class="card">
+        <!-- 활동명 -->
+        <div style="margin-bottom:14px">
+          <div class="field-label">활동명 *</div>
+          <div style="padding:8px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-tertiary)">활동 이름을 입력하세요</div>
+        </div>
+        <!-- 날짜 / 카테고리 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div>
+            <div class="field-label">날짜 및 시간 *</div>
+            <div style="padding:8px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-tertiary);display:flex;align-items:center;gap:6px"><i class="ti ti-calendar" style="font-size:13px" aria-hidden="true"></i>날짜 선택</div>
+          </div>
+          <div>
+            <div class="field-label">카테고리</div>
+            <div style="padding:8px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-tertiary);display:flex;align-items:center;justify-content:space-between"><span>분류 선택</span><i class="ti ti-chevron-down" style="font-size:13px" aria-hidden="true"></i></div>
+          </div>
+        </div>
+        <!-- 장소 -->
+        <div style="margin-bottom:14px">
+          <div class="field-label">장소</div>
+          <div style="padding:8px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-tertiary);display:flex;align-items:center;gap:6px"><i class="ti ti-map-pin" style="font-size:13px" aria-hidden="true"></i>장소를 입력하세요</div>
+        </div>
+        <!-- 설명 -->
+        <div style="margin-bottom:14px">
+          <div class="field-label">활동 설명</div>
+          <div style="padding:8px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-tertiary);height:56px">활동 내용, 준비물 등을 자유롭게 작성하세요</div>
+        </div>
+        <!-- 참여 멤버 -->
+        <div style="margin-bottom:14px">
+          <div class="field-label">참여 멤버</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;padding:8px 10px;border:0.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-md)">
+            <div style="display:flex;align-items:center;gap:4px;padding:3px 8px;background:var(--color-background-info);border-radius:10px;font-size:11px;color:var(--color-text-info)">김민준 <i class="ti ti-x" style="font-size:10px" aria-hidden="true"></i></div>
+            <div style="display:flex;align-items:center;gap:4px;padding:3px 8px;background:var(--color-background-secondary);border-radius:10px;font-size:11px;color:var(--color-text-secondary)">이수연 <i class="ti ti-x" style="font-size:10px" aria-hidden="true"></i></div>
+            <div style="padding:3px 8px;border:0.5px dashed var(--color-border-tertiary);border-radius:10px;font-size:11px;color:var(--color-text-tertiary);cursor:pointer"><i class="ti ti-plus" style="font-size:10px" aria-hidden="true"></i> 추가</div>
+          </div>
+        </div>
+        <!-- 사진 첨부 -->
+        <div style="margin-bottom:16px">
+          <div class="field-label">사진 첨부</div>
+          <div style="display:flex;align-items:center;gap:8px;padding:12px;border:0.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);justify-content:center;flex-direction:column">
+            <i class="ti ti-upload" style="font-size:18px;color:var(--color-text-tertiary)" aria-hidden="true"></i>
+            <span style="font-size:11px;color:var(--color-text-tertiary)">파일을 드래그하거나 클릭하여 업로드</span>
+          </div>
+        </div>
+        <!-- 버튼 -->
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button style="padding:8px 16px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;cursor:pointer;color:var(--color-text-secondary)">취소</button>
+          <button style="padding:8px 16px;font-size:12px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);cursor:pointer">활동 등록</button>
+        </div>
+      </div>
+      <div class="annot" style="margin-top:8px"><i class="ti ti-info-circle" aria-hidden="true"></i>필수 항목(*) 미입력 시 등록 버튼 비활성화</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== S5 멤버 관리 ===== -->
+<div id="s5" class="screen">
+  <div class="screen-header">
+    <div class="screen-num">5</div>
+    <div class="screen-title">멤버 관리</div>
+    <div class="screen-desc">구성원 목록 · 역할 · 참여 이력</div>
+  </div>
+  <div class="mockup-frame">
+    <div class="topbar">
+      <div class="topbar-logo"><span>C</span>클럽로그</div>
+      <div class="topbar-nav">
+        <div class="tnav">대시보드</div>
+        <div class="tnav">활동 기록</div>
+        <div class="tnav on">멤버</div>
+        <div class="tnav">앨범</div>
+      </div>
+    </div>
+    <div style="padding: 16px;">
+      <!-- 검색 -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+        <div style="flex:1;display:flex;align-items:center;gap:6px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px 10px">
+          <i class="ti ti-search" style="font-size:14px;color:var(--color-text-tertiary)" aria-hidden="true"></i>
+          <span style="font-size:12px;color:var(--color-text-tertiary)">멤버 이름 검색</span>
+        </div>
+        <button style="padding:7px 12px;font-size:12px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);cursor:pointer;display:flex;align-items:center;gap:4px"><i class="ti ti-user-plus" aria-hidden="true"></i> 초대</button>
+      </div>
+      <!-- 통계 카드 -->
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px">
+        <div class="card" style="padding:10px;text-align:center">
+          <div style="font-size:18px;font-weight:500;color:var(--color-text-primary)">18</div>
+          <div style="font-size:10px;color:var(--color-text-tertiary)">전체 멤버</div>
+        </div>
+        <div class="card" style="padding:10px;text-align:center">
+          <div style="font-size:18px;font-weight:500;color:var(--color-text-primary)">3</div>
+          <div style="font-size:10px;color:var(--color-text-tertiary)">임원</div>
+        </div>
+        <div class="card" style="padding:10px;text-align:center">
+          <div style="font-size:18px;font-weight:500;color:var(--color-text-primary)">15</div>
+          <div style="font-size:10px;color:var(--color-text-tertiary)">일반 회원</div>
+        </div>
+      </div>
+      <!-- 멤버 목록 -->
+      <div class="section-label">멤버 목록</div>
+      <div class="card">
+        <div class="row" style="padding-bottom:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--color-text-info);font-weight:500;flex-shrink:0">김민</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">김민준</div>
+            <div style="font-size:11px;color:var(--color-text-tertiary)">참여 활동 18회 · 가입 2023.03</div>
+          </div>
+          <span class="badge badge-blue">회장</span>
+        </div>
+        <hr class="divider" style="margin:0 0 10px">
+        <div class="row" style="padding-bottom:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--color-background-success);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--color-text-success);font-weight:500;flex-shrink:0">이수</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">이수연</div>
+            <div style="font-size:11px;color:var(--color-text-tertiary)">참여 활동 15회 · 가입 2023.03</div>
+          </div>
+          <span class="badge badge-blue">부회장</span>
+        </div>
+        <hr class="divider" style="margin:0 0 10px">
+        <div class="row">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--color-background-tertiary);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--color-text-secondary);font-weight:500;flex-shrink:0">박지</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">박지우</div>
+            <div style="font-size:11px;color:var(--color-text-tertiary)">참여 활동 10회 · 가입 2024.03</div>
+          </div>
+          <span class="badge badge-gray">일반</span>
+        </div>
+      </div>
+      <div class="annot" style="margin-top:8px"><i class="ti ti-info-circle" aria-hidden="true"></i>멤버 클릭 → 개인 프로필 및 활동 이력 확인 가능</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
